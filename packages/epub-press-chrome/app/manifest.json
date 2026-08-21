@@ -3,7 +3,6 @@
     "short_name": "__MSG_appShortName__",
     "version": "1.2.5",
     "author": "sunxen",
-    "homepage_url": "https://github.com/sunxen/EpubPressX",
     "manifest_version": 3,
     "description": "__MSG_appDescription__",
     "icons": {
