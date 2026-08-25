@@ -34016,14 +34016,15 @@ class Browser {
   static ensureHostPermissions(tabs) {
     const origins = Browser.getOriginPatterns(tabs);
     if (!origins.length || !chrome.permissions || !chrome.permissions.request) {
-      return bluebird_default().resolve(true);
+      return bluebird_default().resolve();
     }
 
-    // Call request() directly so it stays in the user-gesture window.
-    // If access is already granted, Chrome resolves true without a prompt.
+    // Best-effort only. Some browsers (especially mobile Chromium forks)
+    // reject request() even when host access is already granted.
+    // Call it in the click gesture, but never block extraction on the result.
     return chrome.permissions.request({
       origins
-    }).catch(() => false);
+    }).then(() => undefined, () => undefined);
   }
   static getTabsHtml(tabs) {
     const htmlPromises = tabs.map(tab => chrome.scripting.executeScript({
@@ -49462,16 +49463,7 @@ jquery_default()('#download').click(() => {
     jquery_default()('#alert-message').text(chrome.i18n.getMessage('textNoItems'));
   } else {
     jquery_default()('#alert-message').text('');
-    browser.ensureHostPermissions(selectedItems).then(granted => {
-      if (!granted) {
-        ui.setAlertMessage(chrome.i18n.getMessage('textNeedSiteAccess'));
-        return null;
-      }
-      return browser.getTabsHtml(selectedItems);
-    }).then(sections => {
-      if (!sections) {
-        return;
-      }
+    browser.ensureHostPermissions(selectedItems).then(() => browser.getTabsHtml(selectedItems)).then(sections => {
       ui.showSection('#downloadSpinner');
       const book = {
         title: sanitizeFilename(jquery_default()('#book-title').val()) || jquery_default()('#book-title').attr('placeholder'),

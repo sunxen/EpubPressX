@@ -75,12 +75,13 @@ class Browser {
     static ensureHostPermissions(tabs) {
         const origins = Browser.getOriginPatterns(tabs);
         if (!origins.length || !chrome.permissions || !chrome.permissions.request) {
-            return Promise.resolve(true);
+            return Promise.resolve();
         }
 
-        // Call request() directly so it stays in the user-gesture window.
-        // If access is already granted, Chrome resolves true without a prompt.
-        return chrome.permissions.request({ origins }).catch(() => false);
+        // Best-effort only. Some browsers (especially mobile Chromium forks)
+        // reject request() even when host access is already granted.
+        // Call it in the click gesture, but never block extraction on the result.
+        return chrome.permissions.request({ origins }).then(() => undefined, () => undefined);
     }
 
     static getTabsHtml(tabs) {

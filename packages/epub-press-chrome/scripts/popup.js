@@ -117,16 +117,9 @@ $('#download').click(() => {
         $('#alert-message').text(chrome.i18n.getMessage('textNoItems'));
     } else {
         $('#alert-message').text('');
-        Browser.ensureHostPermissions(selectedItems).then((granted) => {
-            if (!granted) {
-                UI.setAlertMessage(chrome.i18n.getMessage('textNeedSiteAccess'));
-                return null;
-            }
-            return Browser.getTabsHtml(selectedItems);
-        }).then((sections) => {
-            if (!sections) {
-                return;
-            }
+        Browser.ensureHostPermissions(selectedItems).then(() => (
+            Browser.getTabsHtml(selectedItems)
+        )).then((sections) => {
             UI.showSection('#downloadSpinner');
             const book = {
                 title: sanitizeFilename($('#book-title').val()) || $('#book-title').attr('placeholder'),
